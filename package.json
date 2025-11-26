@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "ci": "biome ci",
-    "lint": "biome check",
-    "format": "biome check --write"
+    "lint": "pnpm exec biome check && pnpm exec solhint contracts/**/*.sol",
+    "format": "pnpm exec biome check --write && pnpm exec solhint --fix --noPrompt contracts/**/*.sol"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
@@ -22,6 +22,7 @@
     "dotenv": "^17.3.1",
     "forge-std": "github:foundry-rs/forge-std#v1.15.0",
     "hardhat": "^3.1.11",
+    "solhint": "^6.0.3",
     "typescript": "^5.9.3",
     "viem": "^2.47.0"
   },
