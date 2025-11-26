@@ -4,6 +4,8 @@ declare global {
       TZ: "UTC";
       NODE_ENV: NodeJS.ProcessEnv;
 
+      ETHERSCAN_API_KEY: string;
+
       SEPOLIA_RPC_URL: string;
       SEPOLIA_PRIVATE_KEY: string;
       SEPOLIA_WETH_CONTRACT_ADDRESS: string;

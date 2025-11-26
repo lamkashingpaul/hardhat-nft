@@ -1,16 +1,42 @@
 import "dotenv/config";
-import hardhatToolboxViem from "@nomicfoundation/hardhat-toolbox-viem";
+import hardhatIgnitionViemPlugin from "@nomicfoundation/hardhat-ignition-viem";
+import hardhatNetworkHelpers from "@nomicfoundation/hardhat-network-helpers";
+import hardhatNodeTestRunner from "@nomicfoundation/hardhat-node-test-runner";
+import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
+import hardhatVerifyPlugin from "@nomicfoundation/hardhat-verify";
+import hardhatViem from "@nomicfoundation/hardhat-viem";
+import hardhatViemAssertions from "@nomicfoundation/hardhat-viem-assertions";
 import { defineConfig } from "hardhat/config";
-import type { Address } from "viem";
 
-const sepoliaRpcUrl = process.env.SEPOLIA_RPC_URL as Address;
-const sepoliaPrivateKey = process.env.SEPOLIA_PRIVATE_KEY as Address;
-const mainnetRpcUrl = process.env.MAINNET_RPC_URL as Address;
+const sepoliaRpcUrl = process.env.SEPOLIA_RPC_URL;
+const sepoliaPrivateKey = process.env.SEPOLIA_PRIVATE_KEY;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
 
 export default defineConfig({
-  plugins: [hardhatToolboxViem],
+  plugins: [
+    hardhatToolboxViemPlugin,
+    hardhatIgnitionViemPlugin,
+    hardhatVerifyPlugin,
+    hardhatViem,
+    hardhatViemAssertions,
+    hardhatNodeTestRunner,
+    hardhatNetworkHelpers,
+  ],
   solidity: {
-    compilers: [{ version: "0.8.33" }, { version: "0.4.19" }],
+    profiles: {
+      default: {
+        version: "0.8.33",
+      },
+      production: {
+        version: "0.8.33",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+    },
   },
   networks: {
     localhost: {
@@ -26,18 +52,17 @@ export default defineConfig({
       type: "edr-simulated",
       chainType: "op",
     },
-    mainnetFork: {
-      type: "edr-simulated",
-      forking: {
-        url: mainnetRpcUrl,
-      },
-    },
     sepolia: {
       type: "http",
       chainType: "l1",
       url: sepoliaRpcUrl,
       accounts: [sepoliaPrivateKey],
       chainId: 11155111,
+    },
+  },
+  verify: {
+    etherscan: {
+      apiKey: etherscanApiKey,
     },
   },
 });
