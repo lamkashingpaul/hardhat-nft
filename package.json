@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
+    "@chainlink/contracts": "^1.5.0",
     "@nomicfoundation/hardhat-ignition": "^3.0.9",
     "@nomicfoundation/hardhat-ignition-viem": "^3.0.9",
     "@nomicfoundation/hardhat-network-helpers": "^3.0.4",
