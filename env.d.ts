@@ -1,3 +1,5 @@
+import type { Address } from "viem";
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -8,15 +10,12 @@ declare global {
 
       SEPOLIA_RPC_URL: string;
       SEPOLIA_PRIVATE_KEY: string;
-      SEPOLIA_WETH_CONTRACT_ADDRESS: string;
 
-      MAINNET_RPC_URL: string;
-      MAINNET_DAI_CONTRACT_ADDRESS: string;
-      MAINNET_WETH_CONTRACT_ADDRESS: string;
-      MAINNET_AAVE_POOL_ADDRESS_PROVIDER_ADDRESS: string;
-      MAINNET_DAI_ETH_PRICE_FEED_ADDRESS: string;
-      MAINNET_ETH_USD_PRICE_FEED_ADDRESS: string;
+      SEPOLIA_VRF_COORDINATOR_ADDRESS: Address;
+      SEPOLIA_RANDOM_IPFS_NFT_REQUEST_FEE: string;
+      SEPOLIA_RANDOM_IPFS_NFT_GAS_LANE: Address;
+      SEPOLIA_RANDOM_IPFS_NFT_SUBSCRIPTION_ID: string;
+      SEPOLIA_RANDOM_IPFS_NFT_CALLBACK_GAS_LIMIT: string;
     }
   }
 }
-export {};
