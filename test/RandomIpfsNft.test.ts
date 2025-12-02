@@ -149,9 +149,10 @@ describe("RandomIpfsNft", { skip: isNotDevelopmentChain }, () => {
 
     it("mints an NFT to the requester with the correct token id", async () => {
       const [senderWallet] = await viem.getWalletClients();
-      await myVrfCoordinatorV25Mock.write.fulfillRandomWords([
+      await myVrfCoordinatorV25Mock.write.fulfillRandomWordsWithOverride([
         1n,
         randomIpfsNft.address,
+        [0n],
       ]);
       const tokenIds = await randomIpfsNft.read.getTokenIdsByMinter([
         senderWallet.account.address,
@@ -176,6 +177,7 @@ describe("RandomIpfsNft", { skip: isNotDevelopmentChain }, () => {
       for (const [chance, expectedBreed] of Object.entries(
         chanceToExpectedBreed,
       )) {
+        const expectedTokenId = await randomIpfsNft.read.getTokenCounter();
         const hashForRequestNft = await randomIpfsNft.write.requestNft({
           value: requestFee,
           account: senderWallet.account.address,
@@ -213,8 +215,13 @@ describe("RandomIpfsNft", { skip: isNotDevelopmentChain }, () => {
         const breed = decodedLog.args.breed;
         const minter = decodedLog.args.minter;
 
+        const recordedBreed = await randomIpfsNft.read.getBreedFromTokenId([
+          expectedTokenId,
+        ]);
+
         assert.strictEqual(eventName, expectedEventName);
         assert.strictEqual(breed, expectedBreed);
+        assert.strictEqual(breed, recordedBreed);
         assert.ok(isAddressEqual(minter, senderWallet.account.address));
       }
     });
@@ -313,6 +320,77 @@ describe("RandomIpfsNft", { skip: isNotDevelopmentChain }, () => {
         randomIpfsNftFromMalicious,
         expectedError,
       );
+    });
+  });
+
+  describe("getTokenIdsByMinter", () => {
+    it("returns the correct token IDs for a given minter", async () => {
+      const [senderWallet] = await viem.getWalletClients();
+      const requestFee = await randomIpfsNft.read.getRequestFee();
+      const hash = await randomIpfsNft.write.requestNft({
+        value: requestFee,
+        account: senderWallet.account.address,
+      });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      const decodedLog = decodeEventLog({
+        abi: [randomIpfsNft.abi[12]],
+        data: receipt.logs[1].data,
+        topics: receipt.logs[1].topics,
+      });
+      const requestId = decodedLog.args.requestId;
+
+      await myVrfCoordinatorV25Mock.write.fulfillRandomWordsWithOverride([
+        requestId,
+        randomIpfsNft.address,
+        [0n],
+      ]);
+
+      const tokenIds = await randomIpfsNft.read.getTokenIdsByMinter([
+        senderWallet.account.address,
+      ]);
+      assert.deepStrictEqual(tokenIds, [0n]);
+    });
+  });
+
+  describe("getBreedFromTokenId", () => {
+    it("returns the 0 if the token ID is not minted yet", async () => {
+      const breed = await randomIpfsNft.read.getBreedFromTokenId([99n]);
+      assert.strictEqual(breed, 0);
+    });
+
+    it("returns the correct breed for a given token ID", async () => {
+      const expectedTokenId = await randomIpfsNft.read.getTokenCounter();
+      const [senderWallet] = await viem.getWalletClients();
+      const requestFee = await randomIpfsNft.read.getRequestFee();
+      const hash = await randomIpfsNft.write.requestNft({
+        value: requestFee,
+        account: senderWallet.account.address,
+      });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      const decodedLog = decodeEventLog({
+        abi: [randomIpfsNft.abi[12]],
+        data: receipt.logs[1].data,
+        topics: receipt.logs[1].topics,
+      });
+      const requestId = decodedLog.args.requestId;
+
+      await myVrfCoordinatorV25Mock.write.fulfillRandomWordsWithOverride([
+        requestId,
+        randomIpfsNft.address,
+        [75n],
+      ]);
+
+      const breed = await randomIpfsNft.read.getBreedFromTokenId([
+        expectedTokenId,
+      ]);
+      assert.strictEqual(breed, 1);
+    });
+  });
+
+  describe("getBreedPercentages", () => {
+    it("returns the correct breed percentages", async () => {
+      const breedPercentages = await randomIpfsNft.read.getBreedPercentages();
+      assert.deepStrictEqual(breedPercentages, [70, 90, 100]);
     });
   });
 });

@@ -169,6 +169,14 @@ contract RandomIpfsNft is VRFConsumerBaseV2Plus {
     }
 
     /**
+     * @notice Public view function that returns the current token counter, which represents the total number of NFTs minted so far. This function allows users to query the total supply of NFTs minted by the contract.
+     * @return The current value of the token counter, indicating the total number of NFTs minted by the contract.
+     */
+    function getTokenCounter() public view returns (uint256) {
+        return s_tokenCounter;
+    }
+
+    /**
      * @notice Public view function that returns an array of token IDs minted by a given minter's address. This function allows users to query the token IDs of the NFTs they have minted.
      * @param minter The address of the minter for whom to retrieve the token IDs
      * @return An array of uint256 representing the token IDs of the NFTs minted by the specified minter.
